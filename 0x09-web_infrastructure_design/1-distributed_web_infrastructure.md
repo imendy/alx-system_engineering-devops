@@ -30,7 +30,8 @@ The Primary-Replica cluster consists of a Primary (Master) database node and one
 
 Primary Node: Responsible for handling write operations. It's the authoritative source for data changes and modifications.
 Replica Node: Handles read operations, offloading traffic from the Primary. It replicates data from the Primary and ensures that data is consistent for read-heavy operations.
-Issues with the Infrastructure:
+
+## Issues with the Infrastructure:
 
 Single Point of Failure (SPOF): The load balancer can become a SPOF. If it fails, traffic distribution and failover would be affected.
 
