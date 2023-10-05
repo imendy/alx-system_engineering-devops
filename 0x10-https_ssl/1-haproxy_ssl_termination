@@ -36,10 +36,15 @@ defaults
         errorfile 504 /etc/haproxy/errors/504.http
 
 frontend endy.tech
-        bind 0:80
-        bind 0:443 ssl crt /etc/letsencrypt/live/www.endy.tech/www.endy.tech.pem
+        bind *:80
+        mode http
         http-request redirect scheme https code 301 unless { ssl_fc }
-        option forwardfor
+        http-request set-header X_Forwarded-Proto http
+        default_backend endy.tech_backend
+
+frontend endy.tech-https
+        bind 0:443 ssl crt /etc/letsencrypt/live/www.endy.tech/www.endy.tech.pem
+        http-request set-header X-Forwarded-Proto https
         default_backend endy.tech_backend
 
 backend endy.tech_backend
