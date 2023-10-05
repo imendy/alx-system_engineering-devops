@@ -34,7 +34,7 @@ defaults
 frontend endy.tech
     timeout client  30000
     bind *:80
-    bind *:443 ssl crt /etc/letsencrypt/live/www.endy.tech/www.endy.tech.pem alpn h2,http/1.1
+    bind *:443 ssl crt /etc/letsencrypt/live/www.endy.tech/www.endy.tech.pem
     http-request redirect scheme https unless { ssl_fc }
     http-request set-header X-Forwarded-Proto https
     default_backend endy.tech_backend
