@@ -1,13 +1,36 @@
 #!/usr/bin/env bash
-# performed a 301 Moved Permanently 
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
 
-sudo apt-get update
-sudo apt-get install -y nginx
 
-echo "Hello World!" | sudo tee /var/www/html/index.html
+echo -e "Updating and installing Nginx.\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
 
-string_for_replacement="server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/imendy permanent;"
+echo -e "\nSetting up some minor stuff.\n"
 
-sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
+# starting nginx service
+sudo service nginx start
 
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
+
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
+
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# Setting up /redirect_me to my github account
+sudo sed -i '24i\       rewrite ^/redirect_me https://www.github/imendy permanent;' /etc/nginx/sites-available/default
+
+# Restarting nginx
 sudo service nginx restart
+
+echo -e "\nCompleted.\n"

@@ -1,26 +1,24 @@
-# This manifest installs ngix and adds redirect page
+# Setup New Ubuntu server with nginx
 
-package {'nginx':
-  ensure => present,
-  name   => 'nginx',
+exec { 'update system':
+        command => '/usr/bin/apt-get update',
+}
+
+package { 'nginx':
+	ensure => 'installed',
+	require => Exec['update system']
 }
 
 file {'/var/www/html/index.html':
-  ensure  => present,
-  path    => '/var/www/html/index.html',
-  content => 'Hello World!',
+	content => 'Hello World!'
 }
 
-file_line { 'redirect_me':
-  ensure => present,
-  path   => '/etc/nginx/sites-available/default',
-  after  => 'listen 80 default_server;',
-  line   => 'rewrite ^/redirect_me https://github.com/imendy permanent;',
+exec {'redirect_me':
+	command => 'sed -i "24i\	rewrite ^/redirect_me https://www.github/imendy permanent;" /etc/nginx/sites-available/default',
+	provider => 'shell'
 }
 
-service { 'nginx':
-  ensure     => running,
-  hasrestart => true,
-  require    => Package['nginx'],
-  subscribe  => File_line['redirect_me'],
+service {'nginx':
+	ensure => running,
+	require => Package['nginx']
 }
