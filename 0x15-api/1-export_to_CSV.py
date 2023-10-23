@@ -1,17 +1,52 @@
 #!/usr/bin/python3
-"""Script to export data in the CSV format"""
+"""Exports to-do list information for a given employee ID to CSV format."""
 import csv
-import requests as req
+import requests
 import sys
 
-if __name__ == "__main__":
-    the_user_id = sys.argv[1]
-    the_url = "https://jsonplaceholder.typicode.com/"
-    the_usr = req.get(the_url + "users/{}".format(the_user_id)).json()
-    the_username = the_usr.get("username")
-    the_todo = req.get(the_url + "todos", params={"userId": the_user_id}).json()
 
-    with open("{}.csv".format(the_user_id), "w", newline="") as csvfile:
-        csv_writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        [csv_writer.writerow([the_user_id, the_username, the_tasks.get("completed"),
-                          the_tasks.get("title")]) for the_tasks in the_todo]
+def get_employee_todo_progress(employee_id):
+    # Define the API endpoint
+    base_url = 'https://jsonplaceholder.typicode.com'
+    user_url = f'{base_url}/users/{employee_id}'
+    todos_url = f'{base_url}/todos'
+
+    # Fetch user data
+    user_response = requests.get(user_url)
+
+    if user_response.status_code != 200:
+        print(f"Error: Could not retrieve user data for ID {employee_id}")
+        return
+
+    user_data = user_response.json()
+    user_id = user_data.get('id')
+    user_name = user_data.get('username')
+
+    # Fetch todos data for a specific user using the query parameter
+    params = {"userId": employee_id}
+    todos_response = requests.get(todos_url, params=params)
+
+    if todos_response.status_code != 200:
+        print(f"Error: Could not retrieve data for user ID {employee_id}")
+        return
+
+    todos_data = todos_response.json()
+
+    # Prepare the CSV file
+    csv_filename = f'{user_id}.csv'
+    with open(csv_filename, 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+
+        # Write each task as a CSV row
+        for todo in todos_data:
+            csv_writer.writerow([user_id, user_name,
+                                 todo.get('completed'), todo.get('title')])
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python3 export_to_CSV.py <employee_id>")
+        sys.exit(1)
+
+    employee_id = int(sys.argv[1])
+    get_employee_todo_progress(employee_id)
